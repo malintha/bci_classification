@@ -1,4 +1,5 @@
-function[data] = load_data(name, ratio)
+% if trim is 1, it takes only 3 channels. else it takes all the channels. 
+function[data] = load_data(name, ratio, trim)
     filename = strcat(name,'.mat');
     rawData = load(filename);
     s=rawData.s;
@@ -12,16 +13,21 @@ function[data] = load_data(name, ratio)
     YTrain=data.YTrain;
     %XTest=data.XTest; This doesnt have labels, so accuracy comparison is not possible
 
-    data = seperateData(XTrain, YTrain, ratio);
+    data = seperateData(XTrain, YTrain, ratio, trim);
     Xte=data.Xte;
     Xtr=data.Xtr;
     Yte=data.Yte;
     Ytr=data.Ytr;
 
-    function data = preProcessData(s, TRIG, Classlabel,SampleRate)
+    function data = preProcessData(s, TRIG, Classlabel, SampleRate)
 
         %taking only c3=28, cz=31 and c4=34 channels
-        relatedS=[s(:,28),s(:,31),s(:,34)];
+        if trim
+            relatedS=[s(:,28),s(:,31),s(:,34)];
+        else
+        relatedS = s;
+        end
+        
         [m,n] = size(relatedS);
         [p,q] = size(TRIG);
 
@@ -55,7 +61,7 @@ function[data] = load_data(name, ratio)
     end
     
     %This function seperate data into two portions:
-    function data = seperateData(X, Y, percentage)
+    function data = seperateData(X, Y, percentage, trim)
         [p,q] = size(Y);
         portion=round(p*percentage);
         %seperating train and test data

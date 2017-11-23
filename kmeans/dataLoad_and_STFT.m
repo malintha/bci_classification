@@ -1,17 +1,5 @@
-clear;
-clc;
-rawData = load('../data/l1b.mat');
-s=rawData.s;
-HDR=rawData.HDR;
-TRIG=HDR.TRIG;
-Classlabel=HDR.Classlabel;
-SampleRate=HDR.SampleRate;
-data=preProcessData(s, TRIG, Classlabel,SampleRate);
-XTrain=data.XTrain;
-YTrain=data.YTrain;
-%XTest=data.XTest; This doesnt have labels, so accuracy comparison is not possible
-percentage=0.5;
-data = seperateData(XTrain, YTrain, percentage);
+data = load_data('k3b',0.5);
+
 Xte=data.Xte;
 Xtr=data.Xtr;
 Yte=data.Yte;
@@ -148,3 +136,17 @@ chunkSize = size(dataChunk,1);
 dataChunkBlackman = blackman(chunkSize).*dataChunk;
 end
 
+%This function seperate data into two portions:
+function data = seperateData(X, Y, percentage)
+    [p,q] = size(Y);
+    portion=round(p*percentage);
+    %seperating train and test data
+    Xte=X(:,:,1:portion);
+    Xtr=X(:,:,(portion+1):p);
+    Yte=Y(1:portion,1);
+    Ytr=Y(portion+1:p,1);
+    data.Xte=Xte;
+    data.Xtr=Xtr;
+    data.Yte=Yte;
+    data.Ytr=Ytr;
+end
