@@ -1,13 +1,13 @@
-function[h_tr, h_te] = nmf(dataset, basis_vecs, iterations_1, iterations_2)   
-    data = load_data(dataset,0.5, 2);
+function[h_tr, h_te] = nmf(dataset, basis_vecs, iterations_1, iterations_2, trim, lower, upper)   
+    data = load_data(dataset,0.5, trim);
     xtr = data.Xtr;
     ytr = data.Ytr;
     xte = data.Xte;
     yte = data.Yte;
 
     % do stft with 128 and 64 overlap
-    s = dostft(xtr, 128, 64, 'hann', 2, 257);
-    ste = abs(dostft(xte, 128, 64, 'hann', 2, 257));
+    s = dostft(xtr, 128, 64, 'hann', lower, upper);
+    ste = abs(dostft(xte, 128, 64, 'hann', lower, upper));
 
     [sw, h_tr] = learnNMF(abs(s), iterations_1, basis_vecs);
     h_te = learnNMF_H(ste, sw, iterations_2);
@@ -35,7 +35,7 @@ function[h_tr, h_te] = nmf(dataset, basis_vecs, iterations_1, iterations_2)
         x_hat = w*h;
         [x_rows, x_cols] = size(x);
         epsilon = sum(sum((x .* log(x./(x_hat + eps))) - x + x_hat,'omitnan'));
-        fprintf(' Iteration: %d Error: %4f\n',it, epsilon);
+%         fprintf(' Iteration: %d Error: %4f\n',it, epsilon);
         w = w_new;
         h = h_new;
     end
@@ -61,7 +61,7 @@ function[h_tr, h_te] = nmf(dataset, basis_vecs, iterations_1, iterations_2)
         y_hat = w*h;
         [y_rows, y_cols] = size(x);
         epsilon = sum(sum((x .* log(x./(y_hat + eps))) - x + y_hat,'omitnan'));
-        fprintf(' Iteration: %d Error: %4f\n',it, epsilon);
+%         fprintf(' Iteration: %d Error: %4f\n',it, epsilon);
         h = h_new;
     end
     end
