@@ -22,7 +22,7 @@ for t=1:trials
     trial_mat = [trial_mat channel_vec];
 end
 
-    %This function seperate data into two portions:
+    %This function gets different windows:
     function window = getWindow(windowName,window_size)
        if strcmp(windowName,'hann')
            window=hann(window_size);
