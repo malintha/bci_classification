@@ -1,4 +1,4 @@
-% if trim is 1, it takes only 3 channels. else it takes all the channels. 
+% if trim is 1, it takes only 3 channels.if trim is 2, it takes only 6 channels else it takes all the channels. 
 function[data] = load_data(name, ratio, trim)
     filename = strcat(name,'.mat');
     rawData = load(filename);
@@ -22,8 +22,10 @@ function[data] = load_data(name, ratio, trim)
     function data = preProcessData(s, TRIG, Classlabel, SampleRate)
 
         %taking only c3=28, cz=31 and c4=34 channels
-        if trim
+        if trim==1
             relatedS=[s(:,28),s(:,31),s(:,34)];
+        elseif trim==2
+            relatedS=[s(:,2),s(:,3),s(:,4),s(:,28),s(:,31),s(:,34)];
         else
         relatedS = s;
         end
