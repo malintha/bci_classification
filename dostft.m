@@ -8,15 +8,15 @@ for t=1:trials
     for c=1:channels
         channel = x(:,c,t);
         s = spectrogram(channel,getWindow(windowName,window_size),overlap);
-        if rem(lowerFr,2)~=0
-            lowerFr=lowerFr+1;
-        end
-        if rem(upperFr,2)~=0
-            upperFr=upperFr+1;
-        end
-        sFiltered=s(lowerFr/2:upperFr/2,:);
-        [m,n] = size(sFiltered);
-        v = reshape(sFiltered,[m*n 1]);
+%         if rem(lowerFr,2)~=0
+%             lowerFr=lowerFr+1;
+%         end
+%         if rem(upperFr,2)~=0
+%             upperFr=upperFr+1;
+%         end
+%         sFiltered=s(lowerFr/2:upperFr/2,:);
+        [m,n] = size(s);
+        v = reshape(s,[m*n 1]);
         channel_vec = [channel_vec; v];
     end
     trial_mat = [trial_mat channel_vec];

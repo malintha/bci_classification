@@ -1,16 +1,14 @@
-function[h_tr, h_te] = nmf(dataset, basis_vecs, iterations_1, iterations_2, trim, lower, upper)   
-    data = load_data(dataset,0.5, trim);
-    xtr = data.Xtr;
-    ytr = data.Ytr;
-    xte = data.Xte;
-    yte = data.Yte;
+function[h_tr, h_te] = nmf(xtr, xte, basis_vecs, iterations_1, iterations_2, lower, upper)   
+    rng(1);
 
     % do stft with 128 and 64 overlap
-    s = dostft(xtr, 128, 64, 'hann', lower, upper);
-    ste = abs(dostft(xte, 128, 64, 'hann', lower, upper));
+    str = dostft(xtr, 128, 64, 'hann', lower, upper);
+    ste = dostft(xte, 128, 64, 'hann', lower, upper);
 
-    [sw, h_tr] = learnNMF(abs(s), iterations_1, basis_vecs);
-    h_te = learnNMF_H(ste, sw, iterations_2);
+%     [sw, h_tr] = learnNMF(abs(s), iterations_1, basis_vecs);
+    [w_tr, h_tr] = nnmf(abs(str), basis_vecs, 'algorithm', 'mult');
+    h_te = learnNMF_H(abs(ste), w_tr, iterations_2);
+%     [~, h_te] = nnmf(abs(ste),basis_vecs, 'w0' ,w_tr, 'algorithm', 'mult');
 
     function[w,h] = learnNMF(x, iterations, b)
     [rows, cols] = size(x);
@@ -23,13 +21,21 @@ function[h_tr, h_te] = nmf(dataset, basis_vecs, iterations_1, iterations_2, trim
         wh = w*h;
         x_over_wh = x./wh;
         w_nume = x_over_wh*h';
-        w_denom = ones_ft*h';
-        w_new = w.*(w_nume./(w_denom + eps));
+%         w_denom = ones_ft*h';
+%         w_new = w.*(w_nume./(w_denom + eps));
+
+        %other approach
+        s_nume = sum(w_nume,2);
+        w_new = w.*s_nume;
+        w_new = w_new ./ sum(w_new);
 
         %update rule for h
         h_nume = w'*x_over_wh;
-        h_denom = w'*ones_ft;
-        h_new = h.*(h_nume./(h_denom + eps));
+%         h_denom = w'*ones_ft;
+%         h_new = h.*(h_nume./(h_denom + eps));
+        % other approach
+        s_h_nume = sum(h_nume);
+        h_new = h.* s_h_nume;
 
         %calculate the error
         x_hat = w*h;
