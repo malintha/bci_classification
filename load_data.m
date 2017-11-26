@@ -1,14 +1,16 @@
 % if trim is 1, it takes only 3 channels.if trim is 2, it takes only 6 channels else it takes all the channels. 
-function[data] = load_data(name, ratio, trim)
+% if artifact is 1,
+function[data] = load_data(name, ratio, trim,artifactRemoval)
     filename = strcat(name,'.mat');
     rawData = load(filename);
     s=rawData.s;
     HDR=rawData.HDR;
+    artifactSelection=HDR.ArtifactSelection;
 
     TRIG=HDR.TRIG;
     Classlabel=HDR.Classlabel;
     SampleRate=HDR.SampleRate;
-    data=preProcessData(s, TRIG, Classlabel,SampleRate);
+    data=preProcessData(s, TRIG, Classlabel,artifactSelection,SampleRate);
     XTrain=data.XTrain;
     YTrain=data.YTrain;
     %XTest=data.XTest; This doesnt have labels, so accuracy comparison is not possible
@@ -19,7 +21,7 @@ function[data] = load_data(name, ratio, trim)
     Yte=data.Yte;
     Ytr=data.Ytr;
 
-    function data = preProcessData(s, TRIG, Classlabel, SampleRate)
+    function data = preProcessData(s, TRIG, Classlabel, artifactSelection, SampleRate)
 
         %taking only c3=28, cz=31 and c4=34 channels
         if trim==1
@@ -46,17 +48,22 @@ function[data] = load_data(name, ratio, trim)
         trainCount=1;
 
         for i=1:p 
-           sampleWindowLower= TRIG(i,1)+SampleRate*3 +1;%triger is at t=3secs
-           sampleWindowUpper= TRIG(i,1)+SampleRate*7;%trail ends at t=7secs
-           singleSample = relatedS(sampleWindowLower:sampleWindowUpper,:);
-           y=Classlabel(i,1);
-           if isnan(y)
-               XTest(:,:,testCount)=singleSample;
-               testCount=testCount+1;
-           else 
-               XTrain(:,:,trainCount)=singleSample;
-               YTrain(trainCount,1)=y;
-               trainCount=trainCount+1;
+           
+           dicision=~artifactRemoval|~artifactSelection(i,1);
+            
+           if(dicision)
+               sampleWindowLower= TRIG(i,1)+SampleRate*3 +1;%triger is at t=3secs
+               sampleWindowUpper= TRIG(i,1)+SampleRate*7;%trail ends at t=7secs
+               singleSample = relatedS(sampleWindowLower:sampleWindowUpper,:);
+               y=Classlabel(i,1);
+               if isnan(y)
+                   XTest(:,:,testCount)=singleSample;
+                   testCount=testCount+1;
+               else 
+                   XTrain(:,:,trainCount)=singleSample;
+                   YTrain(trainCount,1)=y;
+                   trainCount=trainCount+1;
+               end
            end
         end
         data.XTrain=XTrain;
