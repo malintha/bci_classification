@@ -7,6 +7,8 @@ function[h_tr, h_te] = nmf(xtr, xte, basis_vecs, iterations_1, iterations_2, low
 
 %     [sw, h_tr] = learnNMF(abs(s), iterations_1, basis_vecs);
     [w_tr, h_tr] = nnmf(abs(str), basis_vecs, 'algorithm', 'mult');
+%     [w_tr, h_tr] = nnmf(abs(str), basis_vecs, 'w0',w_tr, 'h0', h_tr, 'algorithm', 'als');
+    
     h_te = learnNMF_H(abs(ste), w_tr, iterations_2);
 %     [~, h_te] = nnmf(abs(ste),basis_vecs, 'w0' ,w_tr, 'algorithm', 'mult');
 

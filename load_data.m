@@ -26,6 +26,8 @@ function[data] = load_data(name, ratio, trim)
             relatedS=[s(:,28),s(:,31),s(:,34)];
         elseif trim==2
             relatedS=[s(:,2),s(:,3),s(:,4),s(:,28),s(:,31),s(:,34)];
+        elseif trim == 3
+            relatedS=[s(:,28),s(:,31)];
         else
         relatedS = s;
         end

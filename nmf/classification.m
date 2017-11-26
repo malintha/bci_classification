@@ -1,51 +1,45 @@
-% clear;
-% data = load_data('k3b',0.6, 1);
-% xtr = data.Xtr;
-% ytr = data.Ytr;
-% xte = data.Xte;
-% yte = data.Yte;
-% [length_yte, ~] = size(yte);
-% 
-% %[h_tr, h_te] = nmf(xtr, xte, basis_vecs, iterations_1, iterations_2, lower, upper)   
-% [h_tr, h_te] =  nmf(xtr, xte, 44, 1000, 1000, 6, 14);
-% rng(1);
+clear;
+data = load_data('k3b',0.6, 1);
+xtr = data.Xtr;
+ytr = data.Ytr;
+xte = data.Xte;
+yte = data.Yte;
+[length_yte, ~] = size(yte);
 
-%%%%%%%%%%%%classifications%%%%%%%%%%%%%%%
+% nmf(xtr, xte, basis_vecs, iterations_1, iterations_2, lower, upper)
+% best results with nnmf (multiplicaltive update) and minje's update rule at 44/29 basis vecs
+% best results with nnmf (als update) and minje's update rule at 27 basis vecs
+% for i=20:50
+
+[h_tr, h_te] = nmf(xtr, xte, 44, 1000, 1000, 2, 50);
+[acc_nmf1, acc_nmf2] = sl_nn(h_tr, ytr, h_te, yte, 0.002, 12000, 35);
+fprintf('Basis: %d Accuracy of the classification using train data: %f \n',i,acc_nmf1);
+fprintf('Basis: %d Accuracy of the classification using test data: %f \n',i,acc_nmf2);
+
+
+% [h_tr, h_te] =  plsi(xtr, xte, 40, 1000, 1000, 2, 30);
+% [acc_nmf1, acc_nmf2] = sl_nn(h_tr, ytr, h_te, yte, 0.001, 30000, 35);
+% fprintf('Basis: %d Accuracy of the classification using train data: %f \n',i,acc_nmf1);
+% fprintf('Basis: %d Accuracy of the classification using test data: %f \n',i,acc_nmf2);
+
+%%%%matlab classify%%%%%%%%
+% class = classify(h_te', h_tr', ytr);
+% y_hat_class = class == yte;
+% corrects_classify = sum(y_hat_class);
+% accuracy_classify = corrects_classify/length_yte*100;
+% fprintf('Classify basis: %d correct: %d accuracy: %4f \n',i, corrects_classify, accuracy_classify);
 
 %%%%%%%%%single layer nn%%%%%%%%%
-y_target = get_target_matrix(ytr);
-singlenet = feedforwardnet(30);
-singlenet = train(singlenet,h_tr, y_target');
-y = singlenet(h_te);
-y_hat = y./max(y);
-y_hat = y_hat == 1;
-y_test = get_target_matrix(yte);
-y_accuracy_test = y_hat'.*y_test;
-accuracy = sum(sum(y_accuracy_test));
-fprintf('FFNN  basis: %d correct: %d accuracy: %4f \n',i, accuracy, accuracy/length_yte*100);
+% sl_nn(h_tr,ytr,h_te, yte,learningRate,iterations)
+% [acc1, acc2] = sl_nn(h_tr, ytr, h_te, yte, 0.002, 20000, 35);
+% fprintf('Basis: %d Accuracy of the classification using train data: %f \n',i,acc1);
+% fprintf('Basis: %d Accuracy of the classification using test data: %f \n',i,acc2);
+
+% end
 
 
-%%%%%%%matlab classify%%%%%%%%
-class = classify(h_te', h_tr', ytr);
-y_hat_class = class == yte;
-corrects = sum(y_hat_class);
-fprintf('Classify basis: %d correct: %d accuracy: %4f \n',i, corrects, corrects/length_yte*100);
 
 
-%%%%%%%%%multi layer nn%%%%%%%
-ipconnect = zeros(2,44);
-ipconnect(1,:) = 1;
-ipconnect = boolean(ipconnect);
-
-multinet = network;
-multinet.numInputs = 44;
-multinet.numLayers = 2;
-multinet.biasConnect = [1;1];
-multinet.layerConnect = [0 0;1 0];
-multinet.inputConnect = ipconnect;
-multinet.outputConnect = [0 1];
-multinet.trainfcn = 'trainbfg';
-[m_net,tr] = train(multinet, h_tr, ytr_t);
 
 % get the target matrix 4 rows given one grouping vector
 function[y_out] = get_target_matrix(y)
@@ -61,3 +55,4 @@ y_3 = y_3==y;
 y_4 = y_4==y;
 y_out = horzcat(y_1, y_2, y_3, y_4);
 end
+
