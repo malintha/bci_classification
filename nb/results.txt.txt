@@ -1,0 +1,5 @@
+nb - 50
+nmf+nb - 58.3
+
+PCA+NB = 50
+ica+nb = 27.78
