@@ -2,8 +2,8 @@ function[h_tr, h_te] = nmf(xtr, xte, basis_vecs, iterations_1, iterations_2, low
     rng(1);
 
     % do stft with 128 and 64 overlap
-    str = dostft(xtr, 128, 64, 'hann', lower, upper);
-    ste = dostft(xte, 128, 64, 'hann', lower, upper);
+    str = dostft_vector(xtr, 128, 64, 'hann', lower, upper);
+    ste = dostft_vector(xte, 128, 64, 'hann', lower, upper);
 
 %     str = [str(5:15,:);str(25:45,:);str(55:75,:)];
 %     ste = [ste(5:15,:);ste(25:45,:);ste(55:75,:)];

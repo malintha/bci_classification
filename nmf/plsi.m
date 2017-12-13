@@ -2,8 +2,8 @@ function[h_tr, h_te] = plsi(xtr, xte, basis_vecs, iterations_1, iterations_2, lo
     rng(1);
 
     % do stft with 128 and 64 overlap
-    str = dostft(xtr, 128, 64, 'blackman', lower, upper);
-    ste = dostft(xte, 128, 64, 'blackman', lower, upper);
+    str = dostft_vector(xtr, 128, 64, 'blackman', lower, upper);
+    ste = dostft_vector(xte, 128, 64, 'blackman', lower, upper);
 
     [w_tr, h_tr] = learnplsi(abs(str), iterations_1, basis_vecs);
     h_te = learnplsi_theta(abs(ste), w_tr, iterations_2);
