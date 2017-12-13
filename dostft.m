@@ -16,8 +16,8 @@ for t=1:trials
         end
         sFiltered=s(lowerFr/2:upperFr/2,:);
         [m,n] = size(sFiltered);
-        v = reshape(sFiltered,[m*n 1]);
-        channel_vec = [channel_vec; v];
+%         v = reshape(sFiltered,[m*n 1]);
+        channel_vec = [channel_vec; sFiltered];
     end
     trial_mat = [trial_mat channel_vec];
 end

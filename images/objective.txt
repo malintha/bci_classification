@@ -1,0 +1,6 @@
+understand the dataset, remove uneccessary detais and organize in a suitable manner to proceed.
+
+Study the existing literature to understand state of art approaches to solve the problem. 
+Construct the data matrix by selecting the optimal number of channels and frequency bins that suit our approaches. 
+Perform the feature extraction techniques on frequency domain EEG signal. 
+Apply final layer classification techniques on feature matrices. 
