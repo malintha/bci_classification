@@ -1,0 +1,13 @@
+Accuracy for below settings - 44%
+
+inputSize = 3;
+outputSize = 100;
+outputMode = 'last';
+numClasses = 4;
+maxEpochs = 1500;
+shuffle = 'never';
+
+RNN_STFT_IP - 51.3889 %, when train accuracy is around 80%
+RNN_STFT_IP - 56.9 %, when train accuracy is around 85%, epoch 200
+
+
