@@ -17,4 +17,4 @@ test = 0.6, 3 channels, k3b
 Basis: 25 Accuracy of the classification using train data: 93.055556 
 Basis: 25 Accuracy of the classification using test data: 65.740741 
 Basis: 44 Accuracy of the classification using train data: 100.000000 
-Basis: 44 Accuracy of the classification using test data: 71.296296 
+Basis: 44 Accuracy of the classification using test data: 71.296296 data = load_data('k3b',0.6, 1, 0);

@@ -1,27 +1,29 @@
-function[acc1, acc2] = sl_nn(dataTrain,Ytr,dataTest, Yte,learningRate,iterations, hiddenunits)
-%removing NaN
-[dataTrain,Ytr]=removeNaN(dataTrain,Ytr);
-[dataTest,Yte]=removeNaN(dataTest,Yte);
+function[] = onlyNNforNMFoutput(HTr,HTe,Ytr, Yte)
 
 %NN parameters
 %%%%%Train NN using OXtr%%%%%%%%
-X_input = dataTrain; 
+X_inputTr = HTr;
+X_inputTe = HTe;
 Y_label =getOnehotVectorMode(Ytr);
-% learningRate=0.00001   ;%learningRate=0.00001; inner layer 35
-% iterations=6000;%iterations=6000;
+learningRate=0.002   ;%learningRate=0.00001; inner layer 35
+iterations=11000;%iterations=5000;
 
-parameter=multilayerNeuralNetwork(X_input,Y_label,learningRate,iterations);
+%figure, imagesc(X_inputTr);
+%colorbar();
+%figure, imagesc(X_inputTe);
+%colorbar();
+parameter=multilayerNeuralNetwork(X_inputTr,Y_label,learningRate,iterations,X_inputTe,getOnehotVectorMode(Yte));
 
-X_input = dataTrain;
-Ynew =seprateData(parameter,X_input);
+Ynew =seprateData(parameter,X_inputTr);
 %accuracy calculation
-acc1 = accuracyCalc(Y_label,Ynew);
+acc = accuracyCalc(Y_label,Ynew);
+fprintf('Accuracy of the classification using train data : %f \n',acc);
 
-X_input = dataTest;
-Ynew =seprateData(parameter,X_input);
+Ynew =seprateData(parameter,X_inputTe);
 Ytest=getOnehotVectorMode(Yte);
 %accuracy calculation
-acc2 = accuracyCalc(Ytest,Ynew);
+acc = accuracyCalc(Ytest,Ynew);
+fprintf('Accuracy of the classification using test data : %f \n',acc);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%NN functions%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,7 +40,7 @@ end
 y=oneHot';
 end
 %multilayer perceptron
-function parameter = multilayerNeuralNetwork(Z,y,learningRate,iterations)
+function parameter = multilayerNeuralNetwork(Z,y,learningRate,iterations,dataTest,YN)
 % W and B initialization
 
 [m,n] = size(Z);
@@ -46,13 +48,14 @@ function parameter = multilayerNeuralNetwork(Z,y,learningRate,iterations)
 b = ones(1, n);
 Z = vertcat(Z,b);
 X1 = Z;
-middlelayerSize=hiddenunits;
-rng(1);
+middlelayerSize=35;
+rng(0);%rng('default');
 %1-50 weights for unput features, 51st weight for bias
-W1 = normrnd(0,1,middlelayerSize, m+1)*.001;
+W1 = normrnd(0,1,middlelayerSize, m+1);
 %50 weights for unput to 2nd layer, 51th weight for bias
-W2 = normrnd(0,1,p, middlelayerSize+1)*.001; 
-
+W2 = normrnd(0,1,p, middlelayerSize+1); 
+maxTestAcc=0;
+recorderedIter=0;
 for i=1:iterations
     %forward propagation in 1st layer
     Z1 = W1*X1;%Z1 = W1*X1 + b1;
@@ -74,11 +77,22 @@ for i=1:iterations
     W2 = W2-(learningRate*dW2');
     %Error calulated as cross entropy:
     error=sum(-sum(y.*log(YHat)));
-%     fprintf('Iteration : %d, squared error : %f \n',i, error);   
+    fprintf('Iteration : %d, squared error : %f \n',i, error);  
+    Ynew = getOneHotVec(YHat);
+    acc = accuracyCalc(Ynew,y);
+    parameter.W1 = W1;
+    parameter.W2 = W2;
+    Ynew = seprateData(parameter,dataTest);
+    accNew = accuracyCalc(Ynew,YN);
+    if accNew>maxTestAcc
+        recorderedIter=i;
+        maxTestAcc=accNew;
+    end
+    if acc==100.0
+        break;
+    end
 end
-parameter.W1 = W1;
-parameter.W2 = W2;
-
+fprintf('Iteration : %d, max acc : %f \n',recorderedIter, maxTestAcc);  
 end
 %seperate Data Function
 function Ynew = seprateData(parameter,Z)
@@ -102,6 +116,15 @@ yHat=softMax(Z2);
 Ynew=zeros(p,q);
 for i = 1:q
     [val,index]=max(yHat(:,i));
+    Ynew(index,i)=1;
+end
+end
+%get Onehot vector
+function Ynew = getOneHotVec(Y)
+[p,q]=size(Y);
+Ynew=zeros(p,q);
+for i = 1:q
+    [val,index]=max(Y(:,i));
     Ynew(index,i)=1;
 end
 end
@@ -138,17 +161,6 @@ end
 %tanh function
 function gx = g2(x)
 gx = tanh(x);
-end
-
-%remove NaN present in STFT output
-function [X, Y] = removeNaN(X,Y)
-[row, col] = find(isnan(X));
-U=unique(col);
-m=size(U,1);
-for i=1:m
-    X(:,U(i,1)) = [];
-    Y(U(i,1),:)=[];
-end
 end
 
 end

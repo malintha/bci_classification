@@ -2,7 +2,7 @@ Best is 67.5% with 40/45 basis vectors. And 3 channels. with 2-30 frequency rang
 [h_tr, h_te] =  plsi(xtr, xte, 40, 1000, 1000, 2, 30);
 [acc_nmf1, acc_nmf2] = sl_nn(h_tr, ytr, h_te, yte, 0.001, 30000, 35);
 
-for 2 - 50 range, 64.5%
+for 2 - 50 range, 64.8%
 [h_tr, h_te] =  plsi(xtr, xte, 25, 1000, 1000, 2, 50);
 [acc_nmf1, acc_nmf2] = sl_nn(h_tr, ytr, h_te, yte, 0.001, 35000, 35);
 
