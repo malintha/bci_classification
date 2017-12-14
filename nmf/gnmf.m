@@ -101,8 +101,6 @@ for i=0:iterations
     a3(:,1:common_b) = a3(:,1:common_b).*J_3c;
     a3(:,common_b+1:common_b+ind_b) = a3(:,common_b+1:common_b+ind_b).*J_3i;
 end
-
-
 end
 
 function[J_c] = get_J_c(tr, s, a1, a2, a3, common_b, alpha, lambda, gamma) 
