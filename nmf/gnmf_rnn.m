@@ -35,26 +35,26 @@ xte = data_k3b.Xte;
 ytr = data_k3b.Ytr;
 yte = data_k3b.Yte;
 
-k3b_acc = rnn(xtr, xte, ytr, yte, str1, ste1);
+k3b_acc = rnn(xtr, xte, ytr, yte, str1, ste1, 860);
 
 xtr = data_k6b.Xtr;
 xte = data_k6b.Xte;
 ytr = data_k6b.Ytr;
 yte = data_k6b.Yte;
 
-k6b_acc = rnn(xtr, xte, ytr, yte, str2, ste2);
+k6b_acc = rnn(xtr, xte, ytr, yte, str2, ste2, 450);
 
 xtr = data_l1b.Xtr;
 xte = data_l1b.Xte;
 ytr = data_l1b.Ytr;
 yte = data_l1b.Yte;
 
-l1b_acc = rnn(xtr, xte, ytr, yte, str3, ste3);
+l1b_acc = rnn(xtr, xte, ytr, yte, str3, ste3, 500);
 
 avg_acc = (k3b_acc + k6b_acc + l1b_acc)/3;
 disp(avg_acc);
 
-function[acc] = rnn(xtr, xte, ytr, yte, str1, ste1)
+function[acc] = rnn(xtr, xte, ytr, yte, str1, ste1, maxEpochs)
     tr_trails = size(xtr,3);
     sTr = str1;
     xc = cell(tr_trails,1);
@@ -79,7 +79,6 @@ function[acc] = rnn(xtr, xte, ytr, yte, str1, ste1)
         softmaxLayer
         classificationLayer];
 
-    maxEpochs = 1500;
     shuffle = 'never';
 
     options = trainingOptions('sgdm', ...
