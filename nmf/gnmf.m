@@ -1,25 +1,27 @@
+% Group NMF Implementation. Here we use a vectorized STFT tranformation.
 rng(1);
-% clear;
-% data_k3b = load_data('k3b',0.6, 1, 0);
-% data_k6b = load_data('k6b',0.6, 1, 0);
-% data_l1b = load_data('l1b',0.6, 1, 0);
-% 
-str_k3 = abs(dostft(data_k3b.Xtr, 128, 64, 'hann', 2, 30));
-str_k6 = abs(dostft(data_k6b.Xtr, 128, 64, 'hann', 2, 30));
-str_l1 = abs(dostft(data_l1b.Xtr, 128, 64, 'hann', 2, 30));
+clear;
+data_k3b = load_data('k3b',0.6, 1, 0);
+data_k6b = load_data('k6b',0.6, 1, 0);
+data_l1b = load_data('l1b',0.6, 1, 0);
 
-ste_k3 = abs(dostft(data_k3b.Xte, 128, 64, 'hann', 2, 30));
-ste_k6 = abs(dostft(data_k6b.Xte, 128, 64, 'hann', 2, 30));
-ste_l1 = abs(dostft(data_l1b.Xte, 128, 64, 'hann', 2, 30));
+str_k3 = abs(dostft_vector(data_k3b.Xtr, 128, 64, 'hann', 2, 30));
+str_k6 = abs(dostft_vector(data_k6b.Xtr, 128, 64, 'hann', 2, 30));
+str_l1 = abs(dostft_vector(data_l1b.Xtr, 128, 64, 'hann', 2, 30));
+
+ste_k3 = abs(dostft_vector(data_k3b.Xte, 128, 64, 'hann', 2, 30));
+ste_k6 = abs(dostft_vector(data_k6b.Xte, 128, 64, 'hann', 2, 30));
+ste_l1 = abs(dostft_vector(data_l1b.Xte, 128, 64, 'hann', 2, 30));
 
 % for common_b=4:50
 %     for ind_b=1:10
 % apply group NMF approach for all 3 training datasets
 common_b = 4;
 ind_b = 1;
-% for beta = 0.05:0.05:10
-alpha = 1.05;
-beta = 0.5;
+for beta = 0.1:0.5:10
+    for alpha = 0.1:0.5:10
+% alpha = 1.05;
+% beta = 0.5;
 lambda = 0.5;
 gamma = 0.5;
 [a1, a2, a3, str1, str2, str3] = learn_basis_vectors(str_k3, str_k6, str_l1, common_b, ind_b, 5000, alpha, beta, gamma, lambda);
@@ -29,10 +31,10 @@ ste1 = learn_weights(ste_k3, a1, 500);
 ste2 = learn_weights(ste_k6, a2, 500);
 ste3 = learn_weights(ste_l1, a3, 500);
 
-%%%%matlab classify%%%%
 class_1 = classify(ste1(1:common_b,:)' ,str1(1:common_b,:)', data_k3b.Ytr);
 class_2 = classify(ste2(1:common_b,:)' ,str2(1:common_b,:)', data_k6b.Ytr);
 class_3 = classify(ste3(1:common_b,:)' ,str3(1:common_b,:)', data_l1b.Ytr);
+
 y_hat_class_1 = class_1 == data_k3b.Yte;
 y_hat_class_2 = class_2 == data_k6b.Yte;
 y_hat_class_3 = class_3 == data_l1b.Yte;
@@ -44,10 +46,11 @@ accuracy_k3b = corrects_classify_1/length(data_k3b.Yte)*100;
 accuracy_k6b = corrects_classify_2/length(data_k6b.Yte)*100;
 accuracy_l1b = corrects_classify_3/length(data_l1b.Yte)*100;
 avg = (accuracy_k3b+accuracy_k6b+accuracy_l1b)/3;
-fprintf('alpha: %4f common_b: %d ind_b %d k3b: %4f k6b: %4f l1b: %4f avg: %4f \n',alpha, common_b, ind_b, accuracy_k3b, accuracy_k6b, accuracy_l1b, avg);
+fprintf('alpha: %4f beta: %4f common_b: %d ind_b %d k3b: %4f k6b: %4f l1b: %4f avg: %4f \n',alpha, beta, common_b, ind_b, accuracy_k3b, accuracy_k6b, accuracy_l1b, avg);
 
-%     end
-% end
+    end
+end
+
 % end
 %%%%%%%single layer nn%%%%%%%%%
 [acc1, acc2] = sl_nn(str1(1:common_b,:), data_k3b.Ytr, ste1(1:common_b,:), data_k3b.Yte, 0.002, 20000, 35);
@@ -114,10 +117,13 @@ function[J_i] = get_J_i(tr, s, a1, a2, a3, common_b, ind_b, beta, lambda, gamma)
     J_i = J_i_nume./J_i_denom;
 end
 
-function[] = get_grouped_target_vector(y, target_len)
+function[new_y] = get_grouped_target_vector(y, target_len)
 len_y = length(y);
-new_y = zeros(target_len,1);
-for i=1:len_y:target_len
-    
+step = target_len/len_y;
+new_y = [];
+for i=step:step:target_len
+    temp_y = zeros(step,1);
+    temp_y(:,1) = y(i/step);
+    new_y = [new_y;temp_y];
 end
 end
